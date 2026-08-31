@@ -43,13 +43,12 @@ def paint_nav(app, h):
     app.mode_pill_rects = {}
     app.design_mode_rects = {}
 
-    # SESSION
+    # SESSION — live-shot review views only.
     y = 62
     y = _section_band(c, y, "SESSION") + SECTION_GAP_AFTER
     for mode_id, display, icon_kind in (
         (9, "Shot", "Overview"),
         (1, "Club", None),
-        (3, "Dispersion", "Disp"),
         (4, "Table", "Table"),
         (5, "Numbers", "Nums"),
     ):
@@ -61,10 +60,12 @@ def paint_nav(app, h):
     y = _section_band(c, y, "PRACTICE") + SECTION_GAP_AFTER
     y = v10._nav_item(app, y, 2, "Range", "Range")
 
-    # TOOLS
+    # TOOLS — analysis and setup utilities. Dispersion belongs here because it
+    # is a multi-shot analysis workspace rather than a single-shot session view.
     y += SECTION_GAP_BEFORE
     y = _section_band(c, y, "TOOLS") + SECTION_GAP_AFTER
     for mode_id, display, icon_kind in (
+        (3, "Dispersion", "Disp"),
         (6, "Bag", "Bag"),
         (7, "Fit", "Fit"),
         (8, "Lab", "Lab"),
