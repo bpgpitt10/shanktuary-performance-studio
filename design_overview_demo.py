@@ -1,8 +1,8 @@
 """Shot-view redesign launcher for the isolated sanctuary-brand sandbox."""
 
 import design_demo as base
-import overview_redesign_v10
-import shell_redesign_v11
+import overview_redesign_v11
+import shell_redesign_v12
 import theme
 
 
@@ -31,11 +31,11 @@ class OverviewDesignApp(base.DesignDemoApp):
         self.draw_screen()
 
     def draw_overview_viewport(self, *args, **kwargs):
-        return overview_redesign_v10.draw_overview(self, *args, **kwargs)
+        return overview_redesign_v11.draw_overview(self, *args, **kwargs)
 
     def draw_left_sidebar(self, w, h):
         super().draw_left_sidebar(w, h)
-        shell_redesign_v11.paint_sidebar(self, w, h)
+        shell_redesign_v12.paint_sidebar(self, w, h)
 
         expanded = []
         for x1, y1, x2, y2, idx in getattr(self, "design_shot_card_rects", []):
@@ -45,7 +45,7 @@ class OverviewDesignApp(base.DesignDemoApp):
 
     def draw_nav_rail(self, h):
         super().draw_nav_rail(h)
-        shell_redesign_v11.paint_nav(self, h)
+        shell_redesign_v12.paint_nav(self, h)
 
         for mode_id, rect in list(getattr(self, "design_mode_rects", {}).items()):
             x1, y1, x2, y2 = rect
@@ -53,7 +53,7 @@ class OverviewDesignApp(base.DesignDemoApp):
 
     def draw_top_header(self, w, h, offset_x=0):
         super().draw_top_header(w, h, offset_x=offset_x)
-        shell_redesign_v11.paint_top_header(self, w, h, offset_x=offset_x)
+        shell_redesign_v12.paint_top_header(self, w, h, offset_x=offset_x)
 
     def handle_mouse_press(self, event):
         """Hit-test the final design shell first and stop secondary bindings."""
