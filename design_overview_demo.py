@@ -1,7 +1,7 @@
 """Shot-view redesign launcher for the isolated sanctuary-brand sandbox."""
 
 import design_demo as base
-import overview_redesign_v9
+import overview_redesign_v10
 import shell_redesign_v11
 import theme
 
@@ -23,7 +23,6 @@ class OverviewDesignApp(base.DesignDemoApp):
     def _toggle_design_sidebar(self):
         """Own the Recent Shots drawer state entirely in the design sandbox."""
         self.sidebar_collapsed = not bool(getattr(self, "sidebar_collapsed", False))
-        # Use the production state names as well as closing the two utility menus.
         self.show_session_dropdown = False
         self.show_filter_dropdown = False
         self.show_club_menu = False
@@ -32,14 +31,12 @@ class OverviewDesignApp(base.DesignDemoApp):
         self.draw_screen()
 
     def draw_overview_viewport(self, *args, **kwargs):
-        return overview_redesign_v9.draw_overview(self, *args, **kwargs)
+        return overview_redesign_v10.draw_overview(self, *args, **kwargs)
 
     def draw_left_sidebar(self, w, h):
         super().draw_left_sidebar(w, h)
         shell_redesign_v11.paint_sidebar(self, w, h)
 
-        # Add a few pixels of forgiveness around every visible shot card while
-        # preserving the 8px inter-card gap so adjacent rows never compete.
         expanded = []
         for x1, y1, x2, y2, idx in getattr(self, "design_shot_card_rects", []):
             expanded.append((max(theme.RAIL_W, x1 - 3), y1 - 3,
@@ -50,7 +47,6 @@ class OverviewDesignApp(base.DesignDemoApp):
         super().draw_nav_rail(h)
         shell_redesign_v11.paint_nav(self, h)
 
-        # The whole visual row is the target. Keep rows clipped to the rail.
         for mode_id, rect in list(getattr(self, "design_mode_rects", {}).items()):
             x1, y1, x2, y2 = rect
             self.design_mode_rects[mode_id] = (0, y1 - 2, theme.RAIL_W, y2 + 2)
