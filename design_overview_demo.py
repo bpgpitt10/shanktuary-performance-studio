@@ -1,7 +1,7 @@
 """Shot-view redesign launcher for the isolated design sandbox."""
 
 import design_demo as base
-import overview_redesign_v11
+import overview_redesign_v12
 import shell_redesign_v11
 import theme
 
@@ -31,7 +31,7 @@ class OverviewDesignApp(base.DesignDemoApp):
         self.draw_screen()
 
     def draw_overview_viewport(self, *args, **kwargs):
-        return overview_redesign_v11.draw_overview(self, *args, **kwargs)
+        return overview_redesign_v12.draw_overview(self, *args, **kwargs)
 
     def draw_left_sidebar(self, w, h):
         super().draw_left_sidebar(w, h)
