@@ -4,7 +4,7 @@ import club_redesign_v1
 import design_demo as base
 import dispersion_redesign_v1
 import numbers_redesign_v1
-import overview_redesign_v13
+import overview_redesign_v14
 import shell_redesign_v12
 import table_redesign_v1
 import theme
@@ -48,7 +48,7 @@ class OverviewDesignApp(base.DesignDemoApp):
         self.draw_screen()
 
     def draw_overview_viewport(self, *args, **kwargs):
-        return overview_redesign_v13.draw_overview(self, *args, **kwargs)
+        return overview_redesign_v14.draw_overview(self, *args, **kwargs)
 
     def draw_top_metric_toolbar(self, *args, **kwargs):
         if self.view_mode == 1:
