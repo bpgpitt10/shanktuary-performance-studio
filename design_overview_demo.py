@@ -6,6 +6,12 @@ import design_demo as base
 import overview_redesign_v7
 import shell_redesign_v7
 
+# shell_redesign_v7 reuses the icon renderer that lives one layer below v4.
+# Wire it explicitly before the first paint so packaged builds do not fail on
+# the private helper lookup.
+if not hasattr(shell_redesign_v7.v4, "_draw_nav_icon"):
+    shell_redesign_v7.v4._draw_nav_icon = shell_redesign_v7.v4.v3._draw_nav_icon
+
 
 class OverviewDesignApp(base.DesignDemoApp):
     """Design demo with the experimental Shot view and shell treatment."""
