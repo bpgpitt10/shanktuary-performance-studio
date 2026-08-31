@@ -24,6 +24,12 @@ BLUE_TEXT = v8.BLUE_TEXT
 ORANGE = getattr(theme, "WARN", "#FF7A32")
 GOOD = getattr(theme, "GOOD", "#39A879")
 
+# v7 historically called the nav icon helper through v4, while v4 actually
+# keeps that helper on its imported v3 module. Restore that compatibility
+# alias here so the isolated sanctuary branch cannot crash during first paint.
+if not hasattr(v4, "_draw_nav_icon"):
+    v4._draw_nav_icon = v4.v3._draw_nav_icon
+
 
 def _mix(a, b, t):
     return v7._mix(a, b, t)
