@@ -84,11 +84,16 @@ jobs:
         run: |
           Compress-Archive -Path dist/shanktuary_performance_studio -DestinationPath Shanktuary-Studio-Windows-x64.zip
 
-      - name: Compress Artifacts (macOS)
+      - name: Sign and package macOS app bundle
         if: runner.os == 'macOS'
         shell: bash
         run: |
-          tar -czf Shanktuary-Studio-macOS.zip -C dist shanktuary_performance_studio
+          # --windowed produces a real .app bundle in addition to the raw onedir
+          # folder. Package the .app: PyInstaller lays out nested frameworks for
+          # macOS signing there, while the raw folder can be rejected by dyld.
+          codesign --force --deep --sign - --timestamp=none dist/shanktuary_performance_studio.app
+          codesign --verify --deep --strict --verbose=2 dist/shanktuary_performance_studio.app
+          ditto -c -k --sequesterRsrc --keepParent dist/shanktuary_performance_studio.app Shanktuary-Studio-macOS.zip
 
       - name: Upload Build Artifact to GitHub Actions
         uses: actions/upload-artifact@v4
