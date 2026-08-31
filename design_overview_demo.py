@@ -1,6 +1,7 @@
 """Shot-view redesign launcher for the isolated design sandbox."""
 
 import design_demo as base
+import dispersion_redesign_v1
 import overview_redesign_v12
 import shell_redesign_v12
 import theme
@@ -14,14 +15,7 @@ class OverviewDesignApp(base.DesignDemoApp):
         return bool(rect and rect[0] <= x <= rect[2] and rect[1] <= y <= rect[3])
 
     def _toggle_design_sidebar(self):
-        """Own the Recent Shots drawer state entirely in the design sandbox.
-
-        Production's toggle path also owns legacy hamburger/header geometry.
-        Mixing that state machine with the repainted design shell caused the
-        drawer to close but intermittently fail to reopen. The design demo now
-        flips only the actual collapsed state and redraws from one source of
-        truth.
-        """
+        """Own the Recent Shots drawer state entirely in the design sandbox."""
         self.sidebar_collapsed = not bool(getattr(self, "sidebar_collapsed", False))
         self.show_session_menu = False
         self.show_filter_menu = False
@@ -32,6 +26,11 @@ class OverviewDesignApp(base.DesignDemoApp):
 
     def draw_overview_viewport(self, *args, **kwargs):
         return overview_redesign_v12.draw_overview(self, *args, **kwargs)
+
+    def draw_dispersion_and_gapping(self, avail_w, h, offset_x=0):
+        return dispersion_redesign_v1.draw_dispersion_and_gapping(
+            self, avail_w, h, offset_x=offset_x
+        )
 
     def draw_left_sidebar(self, w, h):
         super().draw_left_sidebar(w, h)
@@ -49,9 +48,15 @@ class OverviewDesignApp(base.DesignDemoApp):
         """Hit-test the FINAL design shell before production's mutable rectangles."""
         x, y = event.x, event.y
 
+        if getattr(self, "view_mode", None) == 3:
+            for rect, submode in getattr(self, "design_dispersion_tab_rects", []):
+                if self._hit(rect, x, y):
+                    self.dispersion_view_submode = submode
+                    self.draw_screen()
+                    return
+
         # Drawer toggle gets a redundant geometry-independent hit zone as well
-        # as the painted design rect. This makes the full visible chevron/tab
-        # responsive even if a legacy production draw mutates shared geometry.
+        # as the painted design rect.
         if getattr(self, "sidebar_collapsed", False):
             drawer_hotzone = (0, 52, theme.RAIL_W + 28, 96)
         else:
@@ -114,6 +119,7 @@ class OverviewDesignApp(base.DesignDemoApp):
         self.design_dexterity_btn_rect = None
         self.design_tools_btn_rect = None
         self.design_fullscreen_btn_rect = None
+        self.design_dispersion_tab_rects = []
 
         super().__init__(root)
 
