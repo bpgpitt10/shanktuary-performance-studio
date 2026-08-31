@@ -1,6 +1,6 @@
 """Shot-view redesign launcher for the isolated design sandbox."""
 
-import club_redesign_v2
+import club_redesign_v3
 import design_demo as base
 import dispersion_redesign_v1
 import numbers_redesign_v1
@@ -52,12 +52,12 @@ class OverviewDesignApp(base.DesignDemoApp):
 
     def draw_top_metric_toolbar(self, *args, **kwargs):
         if self.view_mode == 1:
-            return club_redesign_v2.draw_top_metric_toolbar(self, *args, **kwargs)
+            return club_redesign_v3.draw_top_metric_toolbar(self, *args, **kwargs)
         return super().draw_top_metric_toolbar(*args, **kwargs)
 
     def draw_4_quadrant_studio(self, *args, **kwargs):
         base_draw = super().draw_4_quadrant_studio
-        return club_redesign_v2.draw_4_quadrant_studio(
+        return club_redesign_v3.draw_4_quadrant_studio(
             self, base_draw, *args, **kwargs
         )
 
