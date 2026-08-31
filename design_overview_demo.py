@@ -3,7 +3,7 @@
 import math
 
 import design_demo as base
-import overview_redesign_v4
+import overview_redesign_v5
 import shell_redesign_v4
 
 
@@ -11,7 +11,7 @@ class OverviewDesignApp(base.DesignDemoApp):
     """Design demo with the experimental Overview and shell treatment."""
 
     def draw_overview_viewport(self, *args, **kwargs):
-        return overview_redesign_v4.draw_overview(self, *args, **kwargs)
+        return overview_redesign_v5.draw_overview(self, *args, **kwargs)
 
     def draw_left_sidebar(self, w, h):
         # Let production register all normal click targets, then repaint the
@@ -29,6 +29,16 @@ class OverviewDesignApp(base.DesignDemoApp):
         # Give Recent Shots enough width for the compact/expanded hierarchy in
         # the accepted mockup. Production remains untouched on this branch.
         self.sidebar_width = 330
+
+        # Tk's hand2 cursor renders as a goofy left-pointing glove on macOS.
+        # Keep the native arrow everywhere; selection/hover styling carries the
+        # interaction affordance instead.
+        self.canvas.config(cursor="arrow")
+        self.canvas.bind(
+            "<Motion>",
+            lambda _event: self.canvas.config(cursor="arrow"),
+            add="+",
+        )
 
         # Make the deterministic demo's start-line data agree with its named
         # draw/fade shapes. This only changes in-memory sandbox shots and gives
