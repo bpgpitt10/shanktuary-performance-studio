@@ -3,30 +3,37 @@
 import math
 
 import design_demo as base
-import overview_redesign_v2
+import overview_redesign_v3
+import shell_redesign
 
 
 class OverviewDesignApp(base.DesignDemoApp):
-    """Design demo with the new Overview renderer only."""
+    """Design demo with the experimental Overview and shell treatment."""
 
     def draw_overview_viewport(self, *args, **kwargs):
-        return overview_redesign_v2.draw_overview(self, *args, **kwargs)
+        return overview_redesign_v3.draw_overview(self, *args, **kwargs)
+
+    def draw_left_sidebar(self, w, h):
+        # Let production register every normal click target first, then repaint
+        # the visual layer with the compact expandable design rail.
+        super().draw_left_sidebar(w, h)
+        shell_redesign.paint_sidebar(self, w, h)
+
+    def draw_nav_rail(self, h):
+        super().draw_nav_rail(h)
+        shell_redesign.paint_nav(self, h)
 
     def __init__(self, root):
         super().__init__(root)
 
         # Make the deterministic demo's start-line data agree with its named
         # draw/fade shapes. This only changes in-memory sandbox shots and gives
-        # the new Start -> Movement -> Landing visual something meaningful to
-        # demonstrate.
+        # the Start -> Movement -> Landing visual something meaningful to show.
         for shot in self.session_shots:
             ogc = shot.get("open_golf_coach", {}) or {}
             axis = float(ogc.get("spin_axis_degrees") or 0.0)
             offline = float((ogc.get("us_customary_units", {}) or {}).get(
                 "offline_distance_yards") or 0.0)
-            # Negative spin axis (left-curving for RH) begins modestly right;
-            # positive axis begins modestly left. A tiny finish-line term keeps
-            # nearly straight shots from looking artificially reversed.
             h_launch = -axis * 0.18 + offline * 0.01
             shot["horizontal_launch_angle_degrees"] = max(-3.5, min(3.5, h_launch))
 
