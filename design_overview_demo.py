@@ -3,25 +3,31 @@
 import math
 
 import design_demo as base
-import overview_redesign_v5
-import shell_redesign_v4
+import overview_redesign_v6
+import shell_redesign_v6
 
 
 class OverviewDesignApp(base.DesignDemoApp):
     """Design demo with the experimental Overview and shell treatment."""
 
     def draw_overview_viewport(self, *args, **kwargs):
-        return overview_redesign_v5.draw_overview(self, *args, **kwargs)
+        return overview_redesign_v6.draw_overview(self, *args, **kwargs)
 
     def draw_left_sidebar(self, w, h):
         # Let production register all normal click targets, then repaint the
         # design shell over it without changing session behavior.
         super().draw_left_sidebar(w, h)
-        shell_redesign_v4.paint_sidebar(self, w, h)
+        shell_redesign_v6.paint_sidebar(self, w, h)
 
     def draw_nav_rail(self, h):
         super().draw_nav_rail(h)
-        shell_redesign_v4.paint_nav(self, h)
+        shell_redesign_v6.paint_nav(self, h)
+
+    def draw_top_header(self, w, h, offset_x=0):
+        # Production first registers the normal club/tools/fullscreen hit areas;
+        # the design shell then repaints the full header as one branded surface.
+        super().draw_top_header(w, h, offset_x=offset_x)
+        shell_redesign_v6.paint_top_header(self, w, h, offset_x=offset_x)
 
     def __init__(self, root):
         super().__init__(root)
