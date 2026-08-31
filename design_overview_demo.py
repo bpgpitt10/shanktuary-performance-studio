@@ -2,7 +2,7 @@
 
 import design_demo as base
 import overview_redesign_v8
-import shell_redesign_v8
+import shell_redesign_v9
 
 
 class OverviewDesignApp(base.DesignDemoApp):
@@ -17,24 +17,18 @@ class OverviewDesignApp(base.DesignDemoApp):
 
     def draw_left_sidebar(self, w, h):
         super().draw_left_sidebar(w, h)
-        shell_redesign_v8.paint_sidebar(self, w, h)
+        shell_redesign_v9.paint_sidebar(self, w, h)
 
     def draw_nav_rail(self, h):
         super().draw_nav_rail(h)
-        shell_redesign_v8.paint_nav(self, h)
+        shell_redesign_v9.paint_nav(self, h)
 
     def draw_top_header(self, w, h, offset_x=0):
         super().draw_top_header(w, h, offset_x=offset_x)
-        shell_redesign_v8.paint_top_header(self, w, h, offset_x=offset_x)
+        shell_redesign_v9.paint_top_header(self, w, h, offset_x=offset_x)
 
     def handle_mouse_press(self, event):
-        """Hit-test the FINAL design shell before production's mutable rectangles.
-
-        Production redraws can overwrite shared attributes such as
-        sidebar_toggle_rect after our visible control has already been painted.
-        That made a visible button's live click rectangle live somewhere else.
-        v8 keeps separate design_* geometry and handles it first.
-        """
+        """Hit-test the FINAL design shell before production's mutable rectangles."""
         x, y = event.x, event.y
 
         if self._hit(getattr(self, "design_sidebar_toggle_rect", None), x, y):
@@ -85,7 +79,6 @@ class OverviewDesignApp(base.DesignDemoApp):
         return super().handle_mouse_press(event)
 
     def __init__(self, root):
-        # These exist before base __init__ binds this overridden mouse handler.
         self.design_sidebar_toggle_rect = None
         self.design_shot_card_rects = []
         self.design_mode_rects = {}
@@ -97,8 +90,6 @@ class OverviewDesignApp(base.DesignDemoApp):
         super().__init__(root)
 
         self.sidebar_width = 300
-
-        # Keep the normal native cursor everywhere on macOS.
         self.canvas.config(cursor="arrow")
         self.canvas.bind(
             "<Motion>",
@@ -106,7 +97,6 @@ class OverviewDesignApp(base.DesignDemoApp):
             add="+",
         )
 
-        # Deterministic sandbox-only HLA values for the movement explanation.
         for shot in self.session_shots:
             ogc = shot.get("open_golf_coach", {}) or {}
             axis = float(ogc.get("spin_axis_degrees") or 0.0)
