@@ -1,47 +1,104 @@
 """Shot-view redesign launcher for the isolated design sandbox."""
 
-import math
-
 import design_demo as base
-import overview_redesign_v7
-import shell_redesign_v7
-
-# shell_redesign_v7 reuses the icon renderer that lives one layer below v4.
-# Wire it explicitly before the first paint so packaged builds do not fail on
-# the private helper lookup.
-if not hasattr(shell_redesign_v7.v4, "_draw_nav_icon"):
-    shell_redesign_v7.v4._draw_nav_icon = shell_redesign_v7.v4.v3._draw_nav_icon
+import overview_redesign_v8
+import shell_redesign_v8
 
 
 class OverviewDesignApp(base.DesignDemoApp):
     """Design demo with the experimental Shot view and shell treatment."""
 
+    @staticmethod
+    def _hit(rect, x, y):
+        return bool(rect and rect[0] <= x <= rect[2] and rect[1] <= y <= rect[3])
+
     def draw_overview_viewport(self, *args, **kwargs):
-        return overview_redesign_v7.draw_overview(self, *args, **kwargs)
+        return overview_redesign_v8.draw_overview(self, *args, **kwargs)
 
     def draw_left_sidebar(self, w, h):
-        # Production registers the normal interaction hooks; the design shell
-        # repaints them and, in v7, deliberately replaces the hit rectangles
-        # where the visual controls differ from production.
         super().draw_left_sidebar(w, h)
-        shell_redesign_v7.paint_sidebar(self, w, h)
+        shell_redesign_v8.paint_sidebar(self, w, h)
 
     def draw_nav_rail(self, h):
         super().draw_nav_rail(h)
-        shell_redesign_v7.paint_nav(self, h)
+        shell_redesign_v8.paint_nav(self, h)
 
     def draw_top_header(self, w, h, offset_x=0):
         super().draw_top_header(w, h, offset_x=offset_x)
-        shell_redesign_v7.paint_top_header(self, w, h, offset_x=offset_x)
+        shell_redesign_v8.paint_top_header(self, w, h, offset_x=offset_x)
+
+    def handle_mouse_press(self, event):
+        """Hit-test the FINAL design shell before production's mutable rectangles.
+
+        Production redraws can overwrite shared attributes such as
+        sidebar_toggle_rect after our visible control has already been painted.
+        That made a visible button's live click rectangle live somewhere else.
+        v8 keeps separate design_* geometry and handles it first.
+        """
+        x, y = event.x, event.y
+
+        if self._hit(getattr(self, "design_sidebar_toggle_rect", None), x, y):
+            self.toggle_sidebar()
+            return
+
+        if not getattr(self, "sidebar_collapsed", False):
+            for x1, y1, x2, y2, shot_idx in getattr(self, "design_shot_card_rects", []):
+                if x1 <= x <= x2 and y1 <= y <= y2:
+                    if 0 <= shot_idx < len(self.session_shots):
+                        self.selected_shot_index = shot_idx
+                        self.current_shot = self.session_shots[shot_idx]
+                        self.show_club_menu = False
+                        self.show_tools_menu = False
+                        self.draw_screen()
+                    return
+
+        for mode_id, rect in getattr(self, "design_mode_rects", {}).items():
+            if self._hit(rect, x, y):
+                self.show_club_menu = False
+                self.show_tools_menu = False
+                self.set_mode(mode_id)
+                return
+
+        if self._hit(getattr(self, "design_club_btn_rect", None), x, y):
+            self.show_club_menu = not getattr(self, "show_club_menu", False)
+            self.show_tools_menu = False
+            self.draw_screen()
+            return
+
+        if self._hit(getattr(self, "design_dexterity_btn_rect", None), x, y):
+            self.is_left_handed = not getattr(self, "is_left_handed", False)
+            self.show_club_menu = False
+            self.show_tools_menu = False
+            self.draw_screen()
+            return
+
+        if self._hit(getattr(self, "design_tools_btn_rect", None), x, y):
+            self.show_tools_menu = not getattr(self, "show_tools_menu", False)
+            self.show_club_menu = False
+            self.draw_screen()
+            return
+
+        if self._hit(getattr(self, "design_fullscreen_btn_rect", None), x, y):
+            self.toggle_fullscreen()
+            return
+
+        return super().handle_mouse_press(event)
 
     def __init__(self, root):
+        # These exist before base __init__ binds this overridden mouse handler.
+        self.design_sidebar_toggle_rect = None
+        self.design_shot_card_rects = []
+        self.design_mode_rects = {}
+        self.design_club_btn_rect = None
+        self.design_dexterity_btn_rect = None
+        self.design_tools_btn_rect = None
+        self.design_fullscreen_btn_rect = None
+
         super().__init__(root)
 
-        # Slightly narrower Recent Shots rail; the persistent collapse/reopen
-        # control makes reclaiming the entire rail an intentional interaction.
         self.sidebar_width = 300
 
-        # Tk's hand2 cursor renders as a goofy left-pointing glove on macOS.
+        # Keep the normal native cursor everywhere on macOS.
         self.canvas.config(cursor="arrow")
         self.canvas.bind(
             "<Motion>",
@@ -49,8 +106,7 @@ class OverviewDesignApp(base.DesignDemoApp):
             add="+",
         )
 
-        # Make deterministic demo start-line data agree with named draw/fade
-        # shapes. This only changes in-memory sandbox shots.
+        # Deterministic sandbox-only HLA values for the movement explanation.
         for shot in self.session_shots:
             ogc = shot.get("open_golf_coach", {}) or {}
             axis = float(ogc.get("spin_axis_degrees") or 0.0)
