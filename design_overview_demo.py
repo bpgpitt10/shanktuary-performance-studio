@@ -3,14 +3,14 @@
 import math
 
 import design_demo as base
-import overview_redesign
+import overview_redesign_v2
 
 
 class OverviewDesignApp(base.DesignDemoApp):
     """Design demo with the new Overview renderer only."""
 
     def draw_overview_viewport(self, *args, **kwargs):
-        return overview_redesign.draw_overview(self, *args, **kwargs)
+        return overview_redesign_v2.draw_overview(self, *args, **kwargs)
 
     def __init__(self, root):
         super().__init__(root)
