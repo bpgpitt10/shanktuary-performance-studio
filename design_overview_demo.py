@@ -3,6 +3,7 @@
 import design_demo as base
 import overview_redesign_v8
 import shell_redesign_v9
+import theme
 
 
 class OverviewDesignApp(base.DesignDemoApp):
@@ -11,6 +12,23 @@ class OverviewDesignApp(base.DesignDemoApp):
     @staticmethod
     def _hit(rect, x, y):
         return bool(rect and rect[0] <= x <= rect[2] and rect[1] <= y <= rect[3])
+
+    def _toggle_design_sidebar(self):
+        """Own the Recent Shots drawer state entirely in the design sandbox.
+
+        Production's toggle path also owns legacy hamburger/header geometry.
+        Mixing that state machine with the repainted design shell caused the
+        drawer to close but intermittently fail to reopen. The design demo now
+        flips only the actual collapsed state and redraws from one source of
+        truth.
+        """
+        self.sidebar_collapsed = not bool(getattr(self, "sidebar_collapsed", False))
+        self.show_session_menu = False
+        self.show_filter_menu = False
+        self.show_club_menu = False
+        self.show_tools_menu = False
+        self.sidebar_width = 300
+        self.draw_screen()
 
     def draw_overview_viewport(self, *args, **kwargs):
         return overview_redesign_v8.draw_overview(self, *args, **kwargs)
@@ -31,8 +49,18 @@ class OverviewDesignApp(base.DesignDemoApp):
         """Hit-test the FINAL design shell before production's mutable rectangles."""
         x, y = event.x, event.y
 
-        if self._hit(getattr(self, "design_sidebar_toggle_rect", None), x, y):
-            self.toggle_sidebar()
+        # Drawer toggle gets a redundant geometry-independent hit zone as well
+        # as the painted design rect. This makes the full visible chevron/tab
+        # responsive even if a legacy production draw mutates shared geometry.
+        if getattr(self, "sidebar_collapsed", False):
+            drawer_hotzone = (0, 52, theme.RAIL_W + 28, 96)
+        else:
+            drawer_hotzone = (self.sidebar_width - 48, 138,
+                              self.sidebar_width + 8, 194)
+
+        if (self._hit(getattr(self, "design_sidebar_toggle_rect", None), x, y)
+                or self._hit(drawer_hotzone, x, y)):
+            self._toggle_design_sidebar()
             return
 
         if not getattr(self, "sidebar_collapsed", False):
