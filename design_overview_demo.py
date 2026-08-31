@@ -5,7 +5,7 @@ import design_demo as base
 import dispersion_redesign_v1
 import numbers_redesign_v1
 import overview_redesign_v15
-import shell_redesign_v12
+import shell_redesign_v13
 import table_redesign_v1
 import theme
 
@@ -21,7 +21,7 @@ class OverviewDesignApp(base.DesignDemoApp):
         """Reserve a real workspace gutter when Recent Shots is collapsed.
 
         Production keys workspace origin off theme.RAIL_W. Temporarily widen
-        that layout value only for the collapsed draw; shell_redesign_v12 pins
+        that layout value only for the collapsed draw; shell_redesign_v13 pins
         the visible navigation itself to 64px and paints the extra 28px as the
         drawer-control gutter. Restoring the token immediately after the draw
         keeps every expanded-state layout and shared theme consumer unchanged.
@@ -30,8 +30,8 @@ class OverviewDesignApp(base.DesignDemoApp):
         try:
             if getattr(self, "sidebar_collapsed", False):
                 theme.RAIL_W = (
-                    shell_redesign_v12.NAV_RAIL_W
-                    + shell_redesign_v12.COLLAPSED_GUTTER_W
+                    shell_redesign_v13.NAV_RAIL_W
+                    + shell_redesign_v13.COLLAPSED_GUTTER_W
                 )
             return super().draw_screen()
         finally:
@@ -86,15 +86,15 @@ class OverviewDesignApp(base.DesignDemoApp):
 
     def draw_left_sidebar(self, w, h):
         super().draw_left_sidebar(w, h)
-        shell_redesign_v12.paint_sidebar(self, w, h)
+        shell_redesign_v13.paint_sidebar(self, w, h)
 
     def draw_nav_rail(self, h):
         super().draw_nav_rail(h)
-        shell_redesign_v12.paint_nav(self, h)
+        shell_redesign_v13.paint_nav(self, h)
 
     def draw_top_header(self, w, h, offset_x=0):
         super().draw_top_header(w, h, offset_x=offset_x)
-        shell_redesign_v12.paint_top_header(self, w, h, offset_x=offset_x)
+        shell_redesign_v13.paint_top_header(self, w, h, offset_x=offset_x)
 
     def handle_mouse_press(self, event):
         """Hit-test the FINAL design shell before production's mutable rectangles."""
@@ -110,8 +110,8 @@ class OverviewDesignApp(base.DesignDemoApp):
         # The collapsed reopen control owns ONLY its dedicated gutter. It no
         # longer borrows any area from SESSION / Shot.
         if getattr(self, "sidebar_collapsed", False):
-            gx1 = shell_redesign_v12.NAV_RAIL_W
-            gx2 = gx1 + shell_redesign_v12.COLLAPSED_GUTTER_W
+            gx1 = shell_redesign_v13.NAV_RAIL_W
+            gx2 = gx1 + shell_redesign_v13.COLLAPSED_GUTTER_W
             drawer_hotzone = (gx1, 52, gx2, 100)
         else:
             drawer_hotzone = (self.sidebar_width - 48, 138,
