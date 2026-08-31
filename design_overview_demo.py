@@ -2,7 +2,7 @@
 
 import design_demo as base
 import overview_redesign_v8
-import shell_redesign_v9
+import shell_redesign_v10
 import theme
 
 
@@ -35,15 +35,15 @@ class OverviewDesignApp(base.DesignDemoApp):
 
     def draw_left_sidebar(self, w, h):
         super().draw_left_sidebar(w, h)
-        shell_redesign_v9.paint_sidebar(self, w, h)
+        shell_redesign_v10.paint_sidebar(self, w, h)
 
     def draw_nav_rail(self, h):
         super().draw_nav_rail(h)
-        shell_redesign_v9.paint_nav(self, h)
+        shell_redesign_v10.paint_nav(self, h)
 
     def draw_top_header(self, w, h, offset_x=0):
         super().draw_top_header(w, h, offset_x=offset_x)
-        shell_redesign_v9.paint_top_header(self, w, h, offset_x=offset_x)
+        shell_redesign_v10.paint_top_header(self, w, h, offset_x=offset_x)
 
     def handle_mouse_press(self, event):
         """Hit-test the FINAL design shell before production's mutable rectangles."""
