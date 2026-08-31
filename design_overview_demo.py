@@ -3,28 +3,32 @@
 import math
 
 import design_demo as base
-import overview_redesign_v3
-import shell_redesign
+import overview_redesign_v4
+import shell_redesign_v4
 
 
 class OverviewDesignApp(base.DesignDemoApp):
     """Design demo with the experimental Overview and shell treatment."""
 
     def draw_overview_viewport(self, *args, **kwargs):
-        return overview_redesign_v3.draw_overview(self, *args, **kwargs)
+        return overview_redesign_v4.draw_overview(self, *args, **kwargs)
 
     def draw_left_sidebar(self, w, h):
-        # Let production register every normal click target first, then repaint
-        # the visual layer with the compact expandable design rail.
+        # Let production register all normal click targets, then repaint the
+        # design shell over it without changing session behavior.
         super().draw_left_sidebar(w, h)
-        shell_redesign.paint_sidebar(self, w, h)
+        shell_redesign_v4.paint_sidebar(self, w, h)
 
     def draw_nav_rail(self, h):
         super().draw_nav_rail(h)
-        shell_redesign.paint_nav(self, h)
+        shell_redesign_v4.paint_nav(self, h)
 
     def __init__(self, root):
         super().__init__(root)
+
+        # Give Recent Shots enough width for the compact/expanded hierarchy in
+        # the accepted mockup. Production remains untouched on this branch.
+        self.sidebar_width = 330
 
         # Make the deterministic demo's start-line data agree with its named
         # draw/fade shapes. This only changes in-memory sandbox shots and gives
