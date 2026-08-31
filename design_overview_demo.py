@@ -2,9 +2,9 @@
 
 import club_redesign_v3
 import design_demo as base
-import dispersion_redesign_v1
 import numbers_redesign_v2
 import overview_redesign_v15
+import remaining_pages_palette_v1
 import shell_redesign_v14
 import table_redesign_v2
 import theme
@@ -62,7 +62,7 @@ class OverviewDesignApp(base.DesignDemoApp):
         )
 
     def draw_dispersion_and_gapping(self, avail_w, h, offset_x=0):
-        return dispersion_redesign_v1.draw_dispersion_and_gapping(
+        return remaining_pages_palette_v1.draw_dispersion_and_gapping(
             self, avail_w, h, offset_x=offset_x
         )
 
@@ -82,6 +82,31 @@ class OverviewDesignApp(base.DesignDemoApp):
             launch, spin, spin_axis, club_path, face_to_path, apex, offline,
             closure_rate=closure_rate, attack_angle=attack_angle,
             dynamic_loft=dynamic_loft, hang_time=hang_time, offset_x=offset_x,
+        )
+
+    def draw_3d_range_viewport(self, *args, **kwargs):
+        return remaining_pages_palette_v1.draw_production_page(
+            self, super().draw_3d_range_viewport, *args, **kwargs
+        )
+
+    def draw_my_bag_viewport(self, *args, **kwargs):
+        return remaining_pages_palette_v1.draw_production_page(
+            self, super().draw_my_bag_viewport, *args, **kwargs
+        )
+
+    def draw_fitting_viewport(self, *args, **kwargs):
+        return remaining_pages_palette_v1.draw_production_page(
+            self, super().draw_fitting_viewport, *args, **kwargs
+        )
+
+    def draw_swing_lab_viewport(self, *args, **kwargs):
+        return remaining_pages_palette_v1.draw_production_page(
+            self, super().draw_swing_lab_viewport, *args, **kwargs
+        )
+
+    def draw_setup_viewport(self, *args, **kwargs):
+        return remaining_pages_palette_v1.draw_production_page(
+            self, super().draw_setup_viewport, *args, **kwargs
         )
 
     def draw_left_sidebar(self, w, h):
