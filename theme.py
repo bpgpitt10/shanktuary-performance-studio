@@ -7,36 +7,42 @@ stopped carrying meaning, so this module is the single source of truth.
 
 Design-pass rules:
 
-* ONE cool neutral ramp (BG -> SURFACE -> HAIRLINE -> TEXT*) builds structure.
-* ONE electric-blue brand scale marks identity, active state, and current data.
-* SEMANTIC colours (GOOD / WARN / DANGER) are reserved for meaning and must
-  never be used decoratively.
+* ONE deep navy ramp (BG -> SURFACE -> HAIRLINE -> TEXT*) builds structure.
+* WARM GOLD / BRONZE is the primary Shanktuary brand accent.
+* MUTED TEAL is the secondary data accent for charts and analytical geometry.
+* SEMANTIC colours (GOOD / WARN / DANGER) are reserved for meaning.
 * Dense data surfaces stay mostly neutral; colour should explain, not compete.
 """
 
 # --- neutral ramp ---------------------------------------------------------
-BG        = "#0B0F16"   # app background / graphite
-RAIL      = "#0E1420"   # nav rail / ink
-SURFACE   = "#111923"   # cards / panels
-SURFACE_2 = "#182334"   # hover, selected row, raised surface
-HAIRLINE  = "#253247"   # 1px separators
+BG        = "#08131F"   # main background / ink navy
+RAIL      = "#0C1928"   # navigation rail / deep navy
+SURFACE   = "#111F2F"   # cards / panels / containers
+SURFACE_2 = "#192B3E"   # hover, selected row, raised surface
+HAIRLINE  = "#2A3B4D"   # 1px separators
 
-TEXT      = "#F3F6FA"   # primary values / headings
-TEXT_2    = "#A6B0BE"   # labels, secondary copy / silver
-TEXT_3    = "#657286"   # units, captions, disabled
+TEXT      = "#F1F3F2"   # primary values / headings
+TEXT_2    = "#AEB8C2"   # labels, secondary copy / silver
+TEXT_3    = "#71808E"   # units, captions, disabled
 
-# --- brand accent: electric blue scale -----------------------------------
-ACCENT_DEEP = "#112A4E"  # selected backgrounds / pressed states
-ACCENT      = "#1E6CFF"  # primary fills / active nav / current shot
-ACCENT_LINE = "#40A3FF"  # strokes, plot highlights, icon detail
-ACCENT_TEXT = "#78BAFF"  # readable blue text on dark surfaces
+# --- primary brand accent: antique gold / bronze -------------------------
+ACCENT_DEEP = "#3A2C1B"  # selected backgrounds / pressed states
+ACCENT      = "#C99A4A"  # primary fills / active nav / current shot
+ACCENT_LINE = "#E0B866"  # gold strokes, active outlines, icon detail
+ACCENT_TEXT = "#E6C477"  # readable champagne-gold text on dark surfaces
+
+# --- secondary data accent: muted teal -----------------------------------
+DATA       = "#2E8290"   # secondary analytical accent
+DATA_LINE  = "#62A9B3"   # chart lines, trajectories, analytical geometry
+DATA_TEXT  = "#82BDC5"   # readable teal text on dark surfaces
+BRONZE     = "#9B6E32"   # secondary gold / dark metallic accent
 
 # --- semantic -------------------------------------------------------------
-GOOD   = "#39A879"   # positive / healthy / consistent; deliberately muted
-WARN   = "#F47A32"   # orange: estimates, attention, moderate miss
-DANGER = "#E34A4A"   # red: bad outcome, error, extreme miss
-GOLD   = "#C89A4A"   # restrained secondary emphasis / score or benchmark
-GUIDE  = "#34445B"   # dashed reference/target lines
+GOOD   = "#4B9A72"   # positive / healthy / consistent; deliberately muted
+WARN   = "#B8893D"   # burnished amber: caution / attention only
+DANGER = "#B94B43"   # brick red: bad outcome / error / extreme miss
+GOLD   = ACCENT       # compatibility alias for older design helpers
+GUIDE  = "#31495A"   # dashed reference/target lines
 
 # Values the Nova cannot measure render in TEXT_3 with a "--" placeholder.
 # See compute_smash_confidence(): a clamped OpenGolfCoach estimate carries no
