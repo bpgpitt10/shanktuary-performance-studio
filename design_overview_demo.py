@@ -1,44 +1,41 @@
-"""Overview-redesign launcher for the isolated design sandbox."""
+"""Shot-view redesign launcher for the isolated design sandbox."""
 
 import math
 
 import design_demo as base
-import overview_redesign_v6
-import shell_redesign_v6
+import overview_redesign_v7
+import shell_redesign_v7
 
 
 class OverviewDesignApp(base.DesignDemoApp):
-    """Design demo with the experimental Overview and shell treatment."""
+    """Design demo with the experimental Shot view and shell treatment."""
 
     def draw_overview_viewport(self, *args, **kwargs):
-        return overview_redesign_v6.draw_overview(self, *args, **kwargs)
+        return overview_redesign_v7.draw_overview(self, *args, **kwargs)
 
     def draw_left_sidebar(self, w, h):
-        # Let production register all normal click targets, then repaint the
-        # design shell over it without changing session behavior.
+        # Production registers the normal interaction hooks; the design shell
+        # repaints them and, in v7, deliberately replaces the hit rectangles
+        # where the visual controls differ from production.
         super().draw_left_sidebar(w, h)
-        shell_redesign_v6.paint_sidebar(self, w, h)
+        shell_redesign_v7.paint_sidebar(self, w, h)
 
     def draw_nav_rail(self, h):
         super().draw_nav_rail(h)
-        shell_redesign_v6.paint_nav(self, h)
+        shell_redesign_v7.paint_nav(self, h)
 
     def draw_top_header(self, w, h, offset_x=0):
-        # Production first registers the normal club/tools/fullscreen hit areas;
-        # the design shell then repaints the full header as one branded surface.
         super().draw_top_header(w, h, offset_x=offset_x)
-        shell_redesign_v6.paint_top_header(self, w, h, offset_x=offset_x)
+        shell_redesign_v7.paint_top_header(self, w, h, offset_x=offset_x)
 
     def __init__(self, root):
         super().__init__(root)
 
-        # Give Recent Shots enough width for the compact/expanded hierarchy in
-        # the accepted mockup. Production remains untouched on this branch.
-        self.sidebar_width = 330
+        # Slightly narrower Recent Shots rail; the persistent collapse/reopen
+        # control makes reclaiming the entire rail an intentional interaction.
+        self.sidebar_width = 300
 
         # Tk's hand2 cursor renders as a goofy left-pointing glove on macOS.
-        # Keep the native arrow everywhere; selection/hover styling carries the
-        # interaction affordance instead.
         self.canvas.config(cursor="arrow")
         self.canvas.bind(
             "<Motion>",
@@ -46,9 +43,8 @@ class OverviewDesignApp(base.DesignDemoApp):
             add="+",
         )
 
-        # Make the deterministic demo's start-line data agree with its named
-        # draw/fade shapes. This only changes in-memory sandbox shots and gives
-        # the Start -> Movement -> Landing visual something meaningful to show.
+        # Make deterministic demo start-line data agree with named draw/fade
+        # shapes. This only changes in-memory sandbox shots.
         for shot in self.session_shots:
             ogc = shot.get("open_golf_coach", {}) or {}
             axis = float(ogc.get("spin_axis_degrees") or 0.0)
@@ -59,7 +55,7 @@ class OverviewDesignApp(base.DesignDemoApp):
 
         if self.session_shots:
             self.current_shot = self.session_shots[self.selected_shot_index]
-        root.title(f"Shanktuary {base.studio.APP_VERSION} · OVERVIEW DESIGN DEMO")
+        root.title(f"Shanktuary {base.studio.APP_VERSION} · SHOT DESIGN DEMO")
         self.draw_screen()
 
 
