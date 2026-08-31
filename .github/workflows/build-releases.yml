@@ -44,15 +44,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt pyinstaller
 
-      - name: Build Executable with PyInstaller (Linux/macOS)
+      # This branch is a visual sandbox. Build the isolated launcher so the
+      # artifact opens with representative shots while the production entry
+      # point (shanktuary_performance_studio.py) stays untouched.
+      - name: Build Design Demo with PyInstaller (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          pyinstaller --noconfirm --onedir --windowed --add-data "assets:assets" shanktuary_performance_studio.py
+          pyinstaller --noconfirm --onedir --windowed --name shanktuary_performance_studio --add-data "assets:assets" design_demo.py
 
-      - name: Build Executable with PyInstaller (Windows)
+      - name: Build Design Demo with PyInstaller (Windows)
         if: runner.os == 'Windows'
         run: |
-          pyinstaller --noconfirm --onedir --windowed --add-data "assets;assets" shanktuary_performance_studio.py
+          pyinstaller --noconfirm --onedir --windowed --name shanktuary_performance_studio --add-data "assets;assets" design_demo.py
 
       - name: Package Linux Tarball & AppImage
         if: runner.os == 'Linux'
