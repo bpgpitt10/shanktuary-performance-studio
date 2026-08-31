@@ -1,9 +1,8 @@
 """Shot-view redesign launcher for the isolated design sandbox."""
 
-import club_redesign_v1
 import design_demo as base
 import overview_redesign_v12
-import shell_redesign_v11
+import shell_redesign_v12
 import theme
 
 
@@ -34,27 +33,17 @@ class OverviewDesignApp(base.DesignDemoApp):
     def draw_overview_viewport(self, *args, **kwargs):
         return overview_redesign_v12.draw_overview(self, *args, **kwargs)
 
-    def draw_top_metric_toolbar(self, *args, **kwargs):
-        if self.view_mode == 1:
-            return club_redesign_v1.draw_top_metric_toolbar(self, *args, **kwargs)
-        return super().draw_top_metric_toolbar(*args, **kwargs)
-
-    def draw_4_quadrant_studio(self, *args, **kwargs):
-        result = super().draw_4_quadrant_studio(*args, **kwargs)
-        club_redesign_v1.polish_club_page(self, *args, **kwargs)
-        return result
-
     def draw_left_sidebar(self, w, h):
         super().draw_left_sidebar(w, h)
-        shell_redesign_v11.paint_sidebar(self, w, h)
+        shell_redesign_v12.paint_sidebar(self, w, h)
 
     def draw_nav_rail(self, h):
         super().draw_nav_rail(h)
-        shell_redesign_v11.paint_nav(self, h)
+        shell_redesign_v12.paint_nav(self, h)
 
     def draw_top_header(self, w, h, offset_x=0):
         super().draw_top_header(w, h, offset_x=offset_x)
-        shell_redesign_v11.paint_top_header(self, w, h, offset_x=offset_x)
+        shell_redesign_v12.paint_top_header(self, w, h, offset_x=offset_x)
 
     def handle_mouse_press(self, event):
         """Hit-test the FINAL design shell before production's mutable rectangles."""
