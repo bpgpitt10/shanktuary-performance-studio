@@ -1,8 +1,8 @@
 """Shot-view redesign launcher for the isolated sanctuary-brand sandbox."""
 
 import design_demo as base
-import overview_redesign_v8
-import shell_redesign_v10
+import overview_redesign_v9
+import shell_redesign_v11
 import theme
 
 
@@ -13,55 +13,66 @@ class OverviewDesignApp(base.DesignDemoApp):
     def _hit(rect, x, y):
         return bool(rect and rect[0] <= x <= rect[2] and rect[1] <= y <= rect[3])
 
-    def _toggle_design_sidebar(self):
-        """Own the Recent Shots drawer state entirely in the design sandbox.
+    @staticmethod
+    def _inflate(rect, px=3, py=3):
+        if not rect:
+            return rect
+        x1, y1, x2, y2 = rect
+        return (x1 - px, y1 - py, x2 + px, y2 + py)
 
-        Production's toggle path also owns legacy hamburger/header geometry.
-        Mixing that state machine with the repainted design shell caused the
-        drawer to close but intermittently fail to reopen. The design demo now
-        flips only the actual collapsed state and redraws from one source of
-        truth.
-        """
+    def _toggle_design_sidebar(self):
+        """Own the Recent Shots drawer state entirely in the design sandbox."""
         self.sidebar_collapsed = not bool(getattr(self, "sidebar_collapsed", False))
-        self.show_session_menu = False
-        self.show_filter_menu = False
+        # Use the production state names as well as closing the two utility menus.
+        self.show_session_dropdown = False
+        self.show_filter_dropdown = False
         self.show_club_menu = False
         self.show_tools_menu = False
         self.sidebar_width = 300
         self.draw_screen()
 
     def draw_overview_viewport(self, *args, **kwargs):
-        return overview_redesign_v8.draw_overview(self, *args, **kwargs)
+        return overview_redesign_v9.draw_overview(self, *args, **kwargs)
 
     def draw_left_sidebar(self, w, h):
         super().draw_left_sidebar(w, h)
-        shell_redesign_v10.paint_sidebar(self, w, h)
+        shell_redesign_v11.paint_sidebar(self, w, h)
+
+        # Add a few pixels of forgiveness around every visible shot card while
+        # preserving the 8px inter-card gap so adjacent rows never compete.
+        expanded = []
+        for x1, y1, x2, y2, idx in getattr(self, "design_shot_card_rects", []):
+            expanded.append((max(theme.RAIL_W, x1 - 3), y1 - 3,
+                             min(self.sidebar_width, x2 + 3), y2 + 3, idx))
+        self.design_shot_card_rects = expanded
 
     def draw_nav_rail(self, h):
         super().draw_nav_rail(h)
-        shell_redesign_v10.paint_nav(self, h)
+        shell_redesign_v11.paint_nav(self, h)
+
+        # The whole visual row is the target. Keep rows clipped to the rail.
+        for mode_id, rect in list(getattr(self, "design_mode_rects", {}).items()):
+            x1, y1, x2, y2 = rect
+            self.design_mode_rects[mode_id] = (0, y1 - 2, theme.RAIL_W, y2 + 2)
 
     def draw_top_header(self, w, h, offset_x=0):
         super().draw_top_header(w, h, offset_x=offset_x)
-        shell_redesign_v10.paint_top_header(self, w, h, offset_x=offset_x)
+        shell_redesign_v11.paint_top_header(self, w, h, offset_x=offset_x)
 
     def handle_mouse_press(self, event):
-        """Hit-test the FINAL design shell before production's mutable rectangles."""
+        """Hit-test the final design shell first and stop secondary bindings."""
         x, y = event.x, event.y
 
-        # Drawer toggle gets a redundant geometry-independent hit zone as well
-        # as the painted design rect. This makes the full visible chevron/tab
-        # responsive even if a legacy production draw mutates shared geometry.
         if getattr(self, "sidebar_collapsed", False):
-            drawer_hotzone = (0, 52, theme.RAIL_W + 28, 96)
+            drawer_hotzone = (theme.RAIL_W - 38, 50, theme.RAIL_W + 10, 101)
         else:
-            drawer_hotzone = (self.sidebar_width - 48, 138,
-                              self.sidebar_width + 8, 194)
+            drawer_hotzone = (self.sidebar_width - 58, 130,
+                              self.sidebar_width + 10, 201)
 
         if (self._hit(getattr(self, "design_sidebar_toggle_rect", None), x, y)
                 or self._hit(drawer_hotzone, x, y)):
             self._toggle_design_sidebar()
-            return
+            return "break"
 
         if not getattr(self, "sidebar_collapsed", False):
             for x1, y1, x2, y2, shot_idx in getattr(self, "design_shot_card_rects", []):
@@ -72,37 +83,37 @@ class OverviewDesignApp(base.DesignDemoApp):
                         self.show_club_menu = False
                         self.show_tools_menu = False
                         self.draw_screen()
-                    return
+                    return "break"
 
         for mode_id, rect in getattr(self, "design_mode_rects", {}).items():
             if self._hit(rect, x, y):
                 self.show_club_menu = False
                 self.show_tools_menu = False
                 self.set_mode(mode_id)
-                return
+                return "break"
 
         if self._hit(getattr(self, "design_club_btn_rect", None), x, y):
             self.show_club_menu = not getattr(self, "show_club_menu", False)
             self.show_tools_menu = False
             self.draw_screen()
-            return
+            return "break"
 
         if self._hit(getattr(self, "design_dexterity_btn_rect", None), x, y):
             self.is_left_handed = not getattr(self, "is_left_handed", False)
             self.show_club_menu = False
             self.show_tools_menu = False
             self.draw_screen()
-            return
+            return "break"
 
         if self._hit(getattr(self, "design_tools_btn_rect", None), x, y):
             self.show_tools_menu = not getattr(self, "show_tools_menu", False)
             self.show_club_menu = False
             self.draw_screen()
-            return
+            return "break"
 
         if self._hit(getattr(self, "design_fullscreen_btn_rect", None), x, y):
             self.toggle_fullscreen()
-            return
+            return "break"
 
         return super().handle_mouse_press(event)
 
