@@ -2,6 +2,7 @@
 
 import design_demo as base
 import dispersion_redesign_v1
+import numbers_redesign_v1
 import overview_redesign_v12
 import shell_redesign_v12
 import table_redesign_v1
@@ -56,6 +57,19 @@ class OverviewDesignApp(base.DesignDemoApp):
     def draw_shot_table_viewport(self, avail_w, h, offset_x=0):
         return table_redesign_v1.draw_shot_table_viewport(
             self, avail_w, h, offset_x=offset_x
+        )
+
+    def draw_big_numbers_viewport(
+        self, avail_w, h, carry, total, ball_speed, club_speed, smash, launch,
+        spin, spin_axis, club_path, face_to_path, apex, offline,
+        closure_rate=0.0, attack_angle=0.0, dynamic_loft=0.0,
+        hang_time=0.0, offset_x=0,
+    ):
+        return numbers_redesign_v1.draw_big_numbers_viewport(
+            self, avail_w, h, carry, total, ball_speed, club_speed, smash,
+            launch, spin, spin_axis, club_path, face_to_path, apex, offline,
+            closure_rate=closure_rate, attack_angle=attack_angle,
+            dynamic_loft=dynamic_loft, hang_time=hang_time, offset_x=offset_x,
         )
 
     def draw_left_sidebar(self, w, h):
