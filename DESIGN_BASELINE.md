@@ -8,6 +8,7 @@ Baseline established from the fork's current main line before any visual changes
 - Branch: feature/design-pass
 - Primary desktop UI: shanktuary_performance_studio.py + theme.py
 - Browser theme source of truth: theme.py -> scripts/gen_theme_css.py -> assets/theme.css
+- GitHub Actions enabled for fork baseline builds.
 
 Design-pass guardrails:
 - Preserve Nova connectivity, shot calculations, persistence, hardware, pressure capture, and physics unless a design requirement explicitly demands a change.
