@@ -1,9 +1,10 @@
 """Shot-view redesign launcher for the isolated design sandbox."""
 
+import club_redesign_v1
 import design_demo as base
 import dispersion_redesign_v1
 import numbers_redesign_v1
-import overview_redesign_v12
+import overview_redesign_v13
 import shell_redesign_v12
 import table_redesign_v1
 import theme
@@ -47,7 +48,17 @@ class OverviewDesignApp(base.DesignDemoApp):
         self.draw_screen()
 
     def draw_overview_viewport(self, *args, **kwargs):
-        return overview_redesign_v12.draw_overview(self, *args, **kwargs)
+        return overview_redesign_v13.draw_overview(self, *args, **kwargs)
+
+    def draw_top_metric_toolbar(self, *args, **kwargs):
+        if self.view_mode == 1:
+            return club_redesign_v1.draw_top_metric_toolbar(self, *args, **kwargs)
+        return super().draw_top_metric_toolbar(*args, **kwargs)
+
+    def draw_4_quadrant_studio(self, *args, **kwargs):
+        result = super().draw_4_quadrant_studio(*args, **kwargs)
+        club_redesign_v1.polish_club_page(self, *args, **kwargs)
+        return result
 
     def draw_dispersion_and_gapping(self, avail_w, h, offset_x=0):
         return dispersion_redesign_v1.draw_dispersion_and_gapping(
