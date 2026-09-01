@@ -48,6 +48,7 @@ jobs:
       - name: Run tests
         env:
           PYTHONPATH: .
+          PYTHONUTF8: "1"
         run: python -m pytest -q
 
       - name: Build Executable with PyInstaller (Linux/macOS)
