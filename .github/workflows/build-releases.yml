@@ -120,6 +120,20 @@ jobs:
           codesign --verify --deep --strict --verbose=2 dist/shanktuary_performance_studio.app
           ditto -c -k --sequesterRsrc --keepParent dist/shanktuary_performance_studio.app Shanktuary-Studio-macOS.zip
 
+      - name: Build macOS integrated UI review fixture
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          pyinstaller --noconfirm --onedir --windowed \
+            --name shanktuary_ui_review \
+            --icon assets/shanktuary_shield.png \
+            --paths src/ui/_legacy \
+            --add-data "assets:assets" \
+            review_app.py
+          codesign --force --deep --sign - --timestamp=none dist/shanktuary_ui_review.app
+          codesign --verify --deep --strict --verbose=2 dist/shanktuary_ui_review.app
+          ditto -c -k --sequesterRsrc --keepParent dist/shanktuary_ui_review.app Shanktuary-Studio-macOS-UI-Review.zip
+
       - name: Upload Build Artifact to GitHub Actions
         uses: actions/upload-artifact@v4
         with:
@@ -128,6 +142,14 @@ jobs:
             ${{ matrix.asset_name }}
             Shanktuary-Studio-x86_64.AppImage
           if-no-files-found: warn
+
+      - name: Upload macOS UI review artifact
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Shanktuary-Studio-macOS-UI-Review.zip
+          path: Shanktuary-Studio-macOS-UI-Review.zip
+          if-no-files-found: error
 
       - name: Upload Binaries to GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
