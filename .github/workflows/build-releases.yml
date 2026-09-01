@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - 'feature/**'
+      - 'handoff/**'
     tags:
       - 'v*'
   workflow_dispatch:
@@ -42,31 +43,37 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt pyinstaller
+          pip install -r requirements.txt pyinstaller pytest
+
+      - name: Run tests
+        run: pytest -q
 
       - name: Build Executable with PyInstaller (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          pyinstaller --noconfirm --onedir --windowed --add-data "assets:assets" shanktuary_performance_studio.py
+          pyinstaller --noconfirm --onedir --windowed \
+            --name shanktuary_performance_studio \
+            --icon assets/shanktuary_shield.png \
+            --paths src/ui/_legacy \
+            --add-data "assets:assets" \
+            shanktuary_app.py
 
       - name: Build Executable with PyInstaller (Windows)
         if: runner.os == 'Windows'
         run: |
-          pyinstaller --noconfirm --onedir --windowed --add-data "assets;assets" shanktuary_performance_studio.py
+          pyinstaller --noconfirm --onedir --windowed --name shanktuary_performance_studio --icon assets/shanktuary_shield.png --paths src/ui/_legacy --add-data "assets;assets" shanktuary_app.py
 
       - name: Package Linux Tarball & AppImage
         if: runner.os == 'Linux'
         run: |
-          # 1. Package Tarball
           tar -czf Shanktuary-Studio-Linux-x64.tar.gz -C dist shanktuary_performance_studio
-          
-          # 2. Package Universal AppImage
+
           mkdir -p AppDir/usr/bin AppDir/usr/share/icons/hicolor/256x256/apps
           cp -r dist/shanktuary_performance_studio/* AppDir/usr/bin/
           cp shanktuary_performance_studio.desktop AppDir/
-          cp assets/iron_face.png AppDir/shanktuary_performance_studio.png
-          cp assets/iron_face.png AppDir/usr/share/icons/hicolor/256x256/apps/shanktuary_performance_studio.png
-          
+          cp assets/shanktuary_shield.png AppDir/shanktuary_performance_studio.png
+          cp assets/shanktuary_shield.png AppDir/usr/share/icons/hicolor/256x256/apps/shanktuary_performance_studio.png
+
           cat << 'EOF' > AppDir/AppRun
           #!/bin/sh
           HERE="$(dirname "$(readlink -f "${0}")")"
@@ -84,11 +91,13 @@ jobs:
         run: |
           Compress-Archive -Path dist/shanktuary_performance_studio -DestinationPath Shanktuary-Studio-Windows-x64.zip
 
-      - name: Compress Artifacts (macOS)
+      - name: Sign and package macOS app bundle
         if: runner.os == 'macOS'
         shell: bash
         run: |
-          tar -czf Shanktuary-Studio-macOS.zip -C dist shanktuary_performance_studio
+          codesign --force --deep --sign - --timestamp=none dist/shanktuary_performance_studio.app
+          codesign --verify --deep --strict --verbose=2 dist/shanktuary_performance_studio.app
+          ditto -c -k --sequesterRsrc --keepParent dist/shanktuary_performance_studio.app Shanktuary-Studio-macOS.zip
 
       - name: Upload Build Artifact to GitHub Actions
         uses: actions/upload-artifact@v4
