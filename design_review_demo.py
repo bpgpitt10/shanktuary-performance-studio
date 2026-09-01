@@ -5,7 +5,7 @@ recomposed textured header without changing production data or connectivity.
 """
 
 import design_overview_demo as current
-import range_redesign_v1
+import range_redesign_v2
 import shell_redesign_v17
 
 
@@ -92,7 +92,7 @@ class ReviewDesignApp(current.OverviewDesignApp):
         self.draw_screen()
 
     def draw_3d_range_viewport(self, *args, **kwargs):
-        return range_redesign_v1.draw_range(self, *args, **kwargs)
+        return range_redesign_v2.draw_range(self, *args, **kwargs)
 
     def draw_top_header(self, w, h, offset_x=0):
         # Paint production once for state/compatibility, then make v17 the only
