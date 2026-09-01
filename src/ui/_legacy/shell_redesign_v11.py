@@ -7,13 +7,12 @@ assets so the header and packaged app use the exact brand artwork.
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from PIL import Image, ImageTk
 
 import shell_redesign_v9 as v9
 import shell_redesign_v10 as v10
 import theme
+from src.ui.asset_paths import asset_path
 
 BLUE = v10.BLUE
 BLUE_LINE = v10.BLUE_LINE
@@ -21,13 +20,12 @@ BLUE_TEXT = v10.BLUE_TEXT
 ORANGE = v10.ORANGE
 GOOD = v9.GOOD
 
-# These renderers now live under src/ui/_legacy instead of the repository root.
-# Resolve the shared root assets from either a source checkout or PyInstaller's
-# _internal tree, where the same relative layout is preserved.
-ASSET_DIR = Path(__file__).resolve().parents[3] / "assets"
-SHIELD_PATH = str(ASSET_DIR / "shanktuary_shield.png")
-WORDMARK_PATH = str(ASSET_DIR / "shanktuary_wordmark.png")
-LOCKUP_PATH = str(ASSET_DIR / "shanktuary_lockup.png")
+# Shared resolver handles both the repository root and PyInstaller's _MEIPASS
+# data directory. Do not derive these paths from this legacy module's __file__:
+# PyInstaller flattens modules differently from a source checkout.
+SHIELD_PATH = asset_path("shanktuary_shield.png")
+WORDMARK_PATH = asset_path("shanktuary_wordmark.png")
+LOCKUP_PATH = asset_path("shanktuary_lockup.png")
 
 
 def _load_brand_image(app, attr, path, target_h):
