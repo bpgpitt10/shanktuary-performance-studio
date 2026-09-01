@@ -6,7 +6,7 @@ recomposed textured header without changing production data or connectivity.
 
 import design_overview_demo as current
 import range_redesign_v1
-import shell_redesign_v15
+import shell_redesign_v16
 
 
 def build_review_shots():
@@ -95,12 +95,12 @@ class ReviewDesignApp(current.OverviewDesignApp):
         return range_redesign_v1.draw_range(self, *args, **kwargs)
 
     def draw_top_header(self, w, h, offset_x=0):
-        # Paint production once for state/compatibility, then make v15 the only
-        # visible header treatment. v15 fully covers the 52px ribbon.
+        # Paint production once for state/compatibility, then make v16 the only
+        # visible header treatment. v16 fully covers the 52px ribbon.
         current.base.studio.ShanktuaryApp.draw_top_header(
             self, w, h, offset_x=offset_x
         )
-        shell_redesign_v15.paint_top_header(self, w, h, offset_x=offset_x)
+        shell_redesign_v16.paint_top_header(self, w, h, offset_x=offset_x)
 
 
 def main():
