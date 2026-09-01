@@ -14,8 +14,32 @@ permissions:
   contents: write
 
 jobs:
+  test:
+    name: Production test suite
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pytest numpy opencv-python-headless
+
+      - name: Run tests
+        env:
+          PYTHONPATH: .
+          PYTHONUTF8: "1"
+        run: python -m pytest -q
+
   build:
     name: Build on ${{ matrix.os }}
+    needs: test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -40,16 +64,10 @@ jobs:
           python-version: '3.10'
           cache: 'pip'
 
-      - name: Install dependencies
+      - name: Install build dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt pyinstaller pytest numpy opencv-python-headless
-
-      - name: Run tests
-        env:
-          PYTHONPATH: .
-          PYTHONUTF8: "1"
-        run: python -m pytest -q
+          pip install -r requirements.txt pyinstaller numpy opencv-python-headless
 
       - name: Build Executable with PyInstaller (Linux/macOS)
         if: runner.os != 'Windows'
