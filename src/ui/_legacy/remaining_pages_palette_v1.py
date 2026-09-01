@@ -79,6 +79,8 @@ _THEME_VALUES = {
     "MUTED": TEXT_3,
 }
 
+_MISSING = object()
+
 
 def _map_color(value):
     if not isinstance(value, str):
@@ -88,7 +90,14 @@ def _map_color(value):
 
 @contextmanager
 def _page_palette(app):
-    saved_theme = {name: getattr(theme, name) for name in _THEME_VALUES}
+    # The production compatibility theme intentionally does not expose every
+    # token used by older design-sandbox renderers (notably GOOD and GOLD).
+    # Treat missing attributes as temporary adapter-owned tokens instead of
+    # crashing before a Tools page can render.
+    saved_theme = {
+        name: getattr(theme, name, _MISSING)
+        for name in _THEME_VALUES
+    }
     for name, value in _THEME_VALUES.items():
         setattr(theme, name, value)
 
@@ -116,7 +125,13 @@ def _page_palette(app):
         for name, original in saved_methods.items():
             setattr(c, name, original)
         for name, value in saved_theme.items():
-            setattr(theme, name, value)
+            if value is _MISSING:
+                try:
+                    delattr(theme, name)
+                except AttributeError:
+                    pass
+            else:
+                setattr(theme, name, value)
 
 
 def draw_production_page(app, draw_fn, *args, **kwargs):
