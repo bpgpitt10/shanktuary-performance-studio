@@ -9,25 +9,38 @@ from pathlib import Path
 def asset_dir() -> Path:
     """Return the shared ``assets`` directory for this running app.
 
-    PyInstaller one-dir apps expose bundled data under ``sys._MEIPASS``. Source
-    runs keep assets at the repository root. Keep the packaged lookup first so
-    renderers never accidentally walk out of the app bundle on macOS/Windows.
+    PyInstaller's layout differs by platform. Windows/Linux usually expose
+    bundled data directly under ``sys._MEIPASS``; macOS app bundles place data
+    under ``Contents/Resources``. Check both explicitly before falling back to
+    a source checkout.
     """
+    candidates = []
+
     meipass = getattr(sys, "_MEIPASS", None)
     if meipass:
-        bundled = Path(meipass) / "assets"
-        if bundled.exists():
-            return bundled
+        base = Path(meipass)
+        candidates.extend([
+            base / "assets",
+            base.parent / "Resources" / "assets",
+            base.parent.parent / "Resources" / "assets",
+        ])
+
+    # macOS .app: .../Contents/MacOS/<executable> -> Contents/Resources/assets
+    try:
+        exe = Path(sys.executable).resolve()
+        candidates.append(exe.parent.parent / "Resources" / "assets")
+    except Exception:
+        pass
 
     here = Path(__file__).resolve()
     # src/ui/asset_paths.py -> repository root
     source = here.parents[2] / "assets"
-    if source.exists():
-        return source
+    candidates.append(source)
 
     # Defensive fallback for unusual editable/install layouts.
-    for parent in here.parents:
-        candidate = parent / "assets"
+    candidates.extend(parent / "assets" for parent in here.parents)
+
+    for candidate in candidates:
         if candidate.exists():
             return candidate
 
