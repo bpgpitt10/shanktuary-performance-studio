@@ -36,6 +36,7 @@ def _shot(idx, club, carry, ball, launch, spin, apex, offline, axis, path, ftp, 
                 "total_distance_yards": total,
                 "offline_distance_yards": offline,
                 "peak_height_yards": apex,
+                "apex_height_yards": apex,
             },
             "smash_factor": smash,
             "total_spin_rpm": spin,
@@ -85,6 +86,69 @@ def build_review_shots():
     return shots
 
 
+def build_pressure_trace():
+    """Create a deterministic, realistic pressure trace for Lab/Setup review."""
+    frames = []
+    for i in range(120):
+        t = i / 119.0
+        if t < 0.14:
+            phase = "Address"
+            lead = 50.0
+        elif t < 0.43:
+            phase = "Backswing"
+            u = (t - 0.14) / 0.29
+            lead = 50.0 - 14.0 * u
+        elif t < 0.52:
+            phase = "Transition"
+            u = (t - 0.43) / 0.09
+            lead = 36.0 + 13.0 * u
+        elif t < 0.69:
+            phase = "Downswing"
+            u = (t - 0.52) / 0.17
+            lead = 49.0 + 30.0 * u
+        elif t < 0.73:
+            phase = "Impact"
+            lead = 80.0
+        else:
+            phase = "Follow Through"
+            u = (t - 0.73) / 0.27
+            lead = 80.0 - 9.0 * u
+
+        impact_bump = math.exp(-((t - 0.71) / 0.055) ** 2)
+        force_bw = 0.98 + 0.78 * impact_bump
+        total_kg = 78.5 * force_bw
+        trail = 100.0 - lead
+        cop_x = (lead - 50.0) * -1.65
+        cop_y = 18.0 * math.sin((t - 0.18) * math.pi * 1.6)
+        torque = 10.0 * math.sin((t - 0.34) * math.pi * 2.2)
+        toe_bias = 0.53 + 0.08 * math.sin(t * math.pi)
+        left_load = total_kg * lead / 100.0
+        right_load = total_kg * trail / 100.0
+
+        frames.append({
+            "timestamp": t * 2.4,
+            "phase": phase,
+            "total_kg": total_kg,
+            "force_bw": force_bw,
+            "pct_left": lead,
+            "pct_right": trail,
+            "left_pct": lead,
+            "right_pct": trail,
+            "left_kg": left_load,
+            "right_kg": right_load,
+            "torque_nm": torque,
+            "cop_x": cop_x,
+            "cop_y": cop_y,
+            "raw_cells": [
+                left_load * toe_bias,
+                right_load * toe_bias,
+                left_load * (1.0 - toe_bias),
+                right_load * (1.0 - toe_bias),
+            ],
+        })
+    return frames
+
+
 class ReviewApp(ShanktuaryDesktopApp):
     def load_session_history(self):
         # Deliberately bypass on-disk user data.
@@ -94,6 +158,57 @@ class ReviewApp(ShanktuaryDesktopApp):
     def save_session_to_file(self):
         # All review interactions remain in memory.
         return
+
+    def _seed_tool_review_state(self, shots):
+        """Populate every analysis tool without touching production storage."""
+        # Dispersion already reads the active session; pin a deterministic scope.
+        self.dispersion_selected_club = "ALL"
+        self.dispersion_view_submode = "split"
+
+        # Bag reads the normal bag + active-session shot stats. Guarantee the
+        # default bag exists even if production initialization changes later.
+        if not getattr(self, "bag", None):
+            self.init_default_bag()
+        self.bag_scope = "session"
+        self.bag_scroll_offset = 0
+
+        # Fit intentionally starts with no clubs selected in production. The
+        # review fixture selects the three clubs that have sample shots.
+        self.fitting_selected_clubs = ["6 Iron", "7 Iron", "8 Iron"]
+        self.fitting_baseline_club = "7 Iron"
+        self.fitting_submode = "split"
+
+        # Lab needs captured pressure data, which a hardware-free review build
+        # would never receive naturally. Keep the trace inline on the selected
+        # shot so get_pressure_trace() uses it without touching the trace store.
+        trace = build_pressure_trace()
+        self.swing_lab_history = trace
+        self.current_shot["pressure_trace"] = trace
+        try:
+            metrics = studio.derive_pressure_metrics(trace)
+            if metrics:
+                self.current_shot["pressure_metrics"] = metrics
+        except Exception:
+            pass
+
+        # Setup should be visually inspectable too. Use the built-in simulator
+        # only in this review launcher; production remains hardware-driven.
+        pm = getattr(studio.obs_server, "pressure_manager", None)
+        if pm is not None:
+            try:
+                pm.set_simulator(True)
+            except Exception:
+                pass
+            try:
+                pm.set_board_mode("dual")
+            except Exception:
+                pass
+            pm.assigned_left = "Review Board L"
+            pm.assigned_right = "Review Board R"
+            pm.latest_frame = trace[-1]
+            pm.last_shot_trace = trace
+
+        self.nova_connected = True
 
     def __init__(self, root):
         super().__init__(root)
@@ -109,6 +224,7 @@ class ReviewApp(ShanktuaryDesktopApp):
         self.club_filter = "ALL"
         self.selected_shot_index = len(shots) - 1
         self.current_shot = shots[-1]
+        self._seed_tool_review_state(shots)
         self.view_mode = 9
         root.title(f"Shanktuary Performance Studio {studio.APP_VERSION} · UI REVIEW")
         self.draw_screen()
