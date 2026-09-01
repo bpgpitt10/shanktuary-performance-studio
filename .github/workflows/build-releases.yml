@@ -30,12 +30,20 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt pytest numpy opencv-python-headless
+          sudo apt-get update
+          sudo apt-get install -y xvfb python3-tk
 
       - name: Run tests
         env:
           PYTHONPATH: .
           PYTHONUTF8: "1"
         run: python -m pytest -q
+
+      - name: Smoke integrated Tools review pages
+        env:
+          PYTHONPATH: .
+          PYTHONUTF8: "1"
+        run: xvfb-run -a python tools_review_smoke.py
 
   build:
     name: Build on ${{ matrix.os }}
