@@ -44,17 +44,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt pyinstaller
 
-      # Visual-review artifact: deterministic data, final design wrappers,
-      # polished Range, and current brand header. Production remains untouched.
+      # Visual-review artifact: deterministic data, current shell, simplified
+      # green Range, and unified Shot/Club strike-marker treatment.
       - name: Build Design Demo with PyInstaller (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          pyinstaller --noconfirm --onedir --windowed --name shanktuary_performance_studio --icon assets/shanktuary_shield.png --add-data "assets:assets" design_review_demo.py
+          pyinstaller --noconfirm --onedir --windowed --name shanktuary_performance_studio --icon assets/shanktuary_shield.png --add-data "assets:assets" design_final_review_demo.py
 
       - name: Build Design Demo with PyInstaller (Windows)
         if: runner.os == 'Windows'
         run: |
-          pyinstaller --noconfirm --onedir --windowed --name shanktuary_performance_studio --icon assets/shanktuary_shield.png --add-data "assets;assets" design_review_demo.py
+          pyinstaller --noconfirm --onedir --windowed --name shanktuary_performance_studio --icon assets/shanktuary_shield.png --add-data "assets;assets" design_final_review_demo.py
 
       - name: Package Linux Tarball & AppImage
         if: runner.os == 'Linux'
